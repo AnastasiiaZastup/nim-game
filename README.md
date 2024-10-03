@@ -22,5 +22,5 @@ To run development mode use command:
   npm start
 ```
 
-##Demo
+## Demo
 ![screan](./src/images/Знімок%20екрана%202024-10-03%20о%2019.41.46.png)
