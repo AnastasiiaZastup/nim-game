@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PlayerInfo from "./PlayerInfo";
 import ComputerInfo from "./ComputerInfo";
 import matchstickImage from "../images/icons8-matches-64.png";
@@ -10,37 +10,39 @@ const MatchesGame = () => {
   const [computerMatches, setComputerMatches] = useState(0);
   const [isPlayerTurn, setIsPlayerTurn] = useState(true);
 
-  const takeMatches = (numMatches) => {
-    // Only allow taking matches if there are enough left
-    if (matchesLeft - numMatches >= 0) {
-      setMatchesLeft(matchesLeft - numMatches);
-      if (isPlayerTurn) {
-        setPlayerMatches(playerMatches + numMatches);
-        setIsPlayerTurn(false);
-        // Trigger computer's turn after a delay
-        setTimeout(computerTurn, 1000);
-      }
-    }
-  };
+  const computerTurn = useCallback(() => {
+    const matchesToTake = optimalMove(matchesLeft);
+    setMatchesLeft(matchesLeft - matchesToTake);
+    setComputerMatches(computerMatches + matchesToTake);
+    setIsPlayerTurn(true);
+  }, [matchesLeft, computerMatches]);
 
-  const computerTurn = () => {
-    if (matchesLeft > 0) {
-      const matchesToTake = optimalMove(matchesLeft);
-      if (matchesToTake > 0) {
-        setMatchesLeft(matchesLeft - matchesToTake);
-        setComputerMatches(computerMatches + matchesToTake);
-      }
-      setIsPlayerTurn(true);
+  useEffect(() => {
+    if (!isPlayerTurn && matchesLeft > 0) {
+      const timer = setTimeout(() => {
+        computerTurn();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isPlayerTurn, matchesLeft, computerTurn]);
+
+  const takeMatches = (numMatches) => {
+    if (isPlayerTurn && matchesLeft - numMatches >= 0) {
+      setMatchesLeft(matchesLeft - numMatches);
+      setPlayerMatches(playerMatches + numMatches);
+      setIsPlayerTurn(false);
     }
   };
 
   const optimalMove = (matchesLeft) => {
     if (matchesLeft <= 0) return 0;
+    const maxTake = Math.min(3, matchesLeft);
     const remainder = matchesLeft % 4;
+
     if (remainder === 0) {
-      return Math.min(3, matchesLeft); // Take 3 if possible
+      return maxTake;
     } else {
-      return Math.min(remainder, matchesLeft); // Take 1, 2, or 3
+      return Math.min(remainder, maxTake);
     }
   };
 
@@ -49,10 +51,10 @@ const MatchesGame = () => {
       const playerEven = playerMatches % 2 === 0;
       const computerEven = computerMatches % 2 === 0;
       return playerEven === computerEven
-        ? "It's a draw!"
+        ? "A draw!"
         : playerEven
-        ? "Player Wins! 🎉"
-        : "Computer Wins! 🤖";
+        ? "The player won! 🎉"
+        : "The computer won! 🤖";
     }
     return "";
   };
@@ -67,11 +69,10 @@ const MatchesGame = () => {
   return (
     <div className="matches-game">
       <h1>Matches Game</h1>
-      <p>Matches left:</p>
+      <p>There are no matches left:</p>
       <div className="matches-container">
-        {/* Render matchstick images based on matchesLeft */}
         {[...Array(matchesLeft)].map((_, index) => (
-          <img key={index} src={matchstickImage} alt="Matchstick" />
+          <img key={index} src={matchstickImage} alt="Match" />
         ))}
       </div>
       <PlayerInfo matches={playerMatches} />
@@ -85,13 +86,13 @@ const MatchesGame = () => {
               <button onClick={() => takeMatches(3)}>Take 3</button>
             </>
           ) : (
-            <p className="computer-turn">Computer is thinking... 🤖</p>
+            <p className="computer-turn">The computer thinks... 🤖</p>
           )}
         </div>
       ) : (
         <div>
           <h2>{checkWinner()}</h2>
-          <button onClick={resetGame}>Play Again</button>
+          <button onClick={resetGame}>Play again</button>
         </div>
       )}
     </div>
