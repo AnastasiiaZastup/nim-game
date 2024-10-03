@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import PlayerInfo from "./PlayerInfo";
 import ComputerInfo from "./ComputerInfo";
+import matchstickImage from "../images/icons8-matches-64.png";
 
 const MatchesGame = () => {
   const [matchesLeft, setMatchesLeft] = useState(25);
@@ -14,7 +15,7 @@ const MatchesGame = () => {
       if (isPlayerTurn) {
         setPlayerMatches(playerMatches + numMatches);
         setIsPlayerTurn(false);
-        setTimeout(computerTurn, 1000); // Хід комп'ютера через 1 секунду
+        setTimeout(computerTurn, 1000); // Computer's turn after 1 second
       }
     }
   };
@@ -47,16 +48,28 @@ const MatchesGame = () => {
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
       <h1>Matches Game</h1>
-      <p>Matches left: {matchesLeft} 🔥</p>
+      <p>Matches left:</p>
+      <div
+        style={{ display: "flex", justifyContent: "center", flexWrap: "wrap" }}
+      >
+        {[...Array(matchesLeft)].map((_, index) => (
+          <img
+            key={index}
+            src={matchstickImage}
+            alt="Matchstick"
+            style={{ width: "30px", margin: "2px" }}
+          />
+        ))}
+      </div>
       <PlayerInfo matches={playerMatches} />
       <ComputerInfo matches={computerMatches} />
       {matchesLeft > 0 ? (
         <div>
           {isPlayerTurn ? (
             <div>
-              <button onClick={() => takeMatches(1)}>Take 1 🔥</button>
-              <button onClick={() => takeMatches(2)}>Take 2 🔥🔥</button>
-              <button onClick={() => takeMatches(3)}>Take 3 🔥🔥🔥</button>
+              <button onClick={() => takeMatches(1)}>Take 1</button>
+              <button onClick={() => takeMatches(2)}>Take 2</button>
+              <button onClick={() => takeMatches(3)}>Take 3</button>
             </div>
           ) : (
             <p>Computer is thinking... 🤖</p>
