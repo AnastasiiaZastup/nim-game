@@ -18,5 +18,5 @@ To install project use command:
 To run development mode use command:
 
 ```bash
-  npm run dev
+  npm start
 ```
